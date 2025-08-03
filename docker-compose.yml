@@ -1,0 +1,68 @@
+services:
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        volumes:
+            - ./app:/var/www/link-shortener/site
+            - ./nginx/load-balancer.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx/log:/var/log/nginx
+        networks:
+            - common
+        ports:
+            - "80:80"
+        depends_on:
+            - php-fpm
+
+    php-fpm:
+        build: ./app/docker/php-fpm
+        restart: unless-stopped
+        working_dir: /var/www/link-shortener/site
+        deploy:
+            replicas: 2
+        volumes:
+            - ./app/docker/php-fpm/php.ini:/etc/php/8.4/fpm/conf.d/99-overrides.ini
+            - ./app/docker/php-fpm/php-fpm.conf:/etc/php/8.4/fpm/pool.d/z-overrides.conf
+            - ./app/docker/php-fpm/log:/var/log/php-fpm
+            - ./app/:/var/www/link-shortener/site
+        environment:
+            - PHP_FPM_LISTEN=0.0.0.0:9000
+        networks:
+            - common
+
+    mysql-master:
+        image: mysql:8.0
+        restart: unless-stopped
+        container_name: mysql-master
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_DATABASE: db
+        volumes:
+            - ./mysql/master/my.cnf:/etc/mysql/conf.d/99-overrides.cnf
+            - ./mysql/master/db:/var/lib/mysql
+            - ./mysql/master/bak/:/bak
+        ports:
+            - 3307:3306
+        command: --server-id=1 --log-bin=mysql-bin --binlog-format=row
+        networks:
+            - common
+
+    mysql-slave:
+        image: mysql:8.0
+        restart: unless-stopped
+        container_name: mysql-slave
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_DATABASE: db
+        volumes:
+            - ./mysql/slave/my.cnf:/etc/mysql/conf.d/99-overrides.cnf
+            - ./mysql/slave/db:/var/lib/mysql
+            - ./mysql/slave/bak/:/bak
+        ports:
+            - 3308:3306
+        command: --server-id=2 --log-bin=mysql-bin --binlog-format=row
+        networks:
+            - common
+
+networks:
+    common:
+        external: true
