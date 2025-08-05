@@ -1,0 +1,19 @@
+services:
+    nginx:
+        extends:
+            file: ./app/docker-compose.yml
+            service: nginx
+
+    php-fpm:
+        extends:
+            file: ./app/docker-compose.yml
+            service: php-fpm
+
+    mysql:
+        extends:
+            file: ./mysql/docker-compose.yml
+            service: mysql
+
+networks:
+    common:
+        external: true
