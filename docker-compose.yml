@@ -14,6 +14,18 @@ services:
             file: ./mysql/docker-compose.yml
             service: mysql
 
+    load-balancer:
+        image: nginx:alpine
+        container_name: load-balancer
+        volumes:
+            - ./app:/var/www/us/site
+            - ./load-balancer/load-balancer.conf:/etc/nginx/nginx.conf:ro
+            - ./load-balancer/log:/var/log/nginx
+        networks:
+            - common
+        ports:
+            - 3000:80
+
 networks:
     common:
         external: true
