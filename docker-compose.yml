@@ -26,6 +26,11 @@ services:
         ports:
             - 3000:80
 
+    clickhouse:
+        extends:
+            service: clickhouse
+            file: ./clickhouse/docker-compose.yml
+
 networks:
     common:
         external: true

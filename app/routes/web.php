@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClickHouseController;
 use App\Http\Controllers\LinkController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,6 @@ Route::controller(LinkController::class)->prefix('links')->as('links.')->group(f
     Route::get('/{link}', 'show')->name('show');
 });
 
-Route::get('/test', function () {
-    dd(gethostname());
+Route::controller(ClickHouseController::class)->prefix('clickhouse')->group(function () {
+    Route::get('/', 'saveData');
 });

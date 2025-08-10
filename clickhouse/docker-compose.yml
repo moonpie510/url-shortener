@@ -1,0 +1,16 @@
+services:
+    clickhouse:
+        image: clickhouse/clickhouse-server:24.8.4
+        ports:
+            - 8123:8123
+        volumes:
+            - ./data:/var/lib/clickhouse
+        environment:
+            CLICKHOUSE_USER: click
+            CLICKHOUSE_PASSWORD: click
+        networks:
+            - common
+
+networks:
+    common:
+        external: true
